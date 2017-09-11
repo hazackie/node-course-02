@@ -24,10 +24,14 @@ const users = [{
 // todos database
 const todos =[{
   _id: new ObjectID(),
-  text: 'Fist test todo'
+  text: 'Fist test todo',
+  _creator: userOneId
 }, {
   _id: new ObjectID(),
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed: true,
+  completedAt: 33,
+  _creator: userTwoId  
 }];
 
 const populateTodos = (done) => {
