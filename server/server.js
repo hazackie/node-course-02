@@ -17,8 +17,15 @@ console.log(process.env.MONGODB_URI);
 app.use(bodyParser.json());
 
 // POST /users/login
-app.post('/users/login', (req, res) => {
-  var body = _.pick(req.body, ['email', 'password']);
+app.post('/users/login', async (req, res) => {
+  try {
+    const body = _.pick(req.body, ['email', 'password']);
+    const user = await User.findByCredentials(body.email, body.password);
+    const token = await user.generateAuthToken();
+    res.header('x-auth', token).send(user);
+  } catch (e) {
+    res.status(400).send();
+  }
 
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
@@ -30,12 +37,19 @@ app.post('/users/login', (req, res) => {
 });
 
 // logout
-app.delete('/users/me/token', authenticate, (req, res) => {
-  req.user.removeToken(req.token).then(() => {
+app.delete('/users/me/token', authenticate, async (req, res) => {
+  try {
+    await req.user.removeToken(req.token);
     res.status(200).send();
-  }, () => {
+  } catch (e) {
     res.status(400).send();
-  });
+  }
+  
+  // req.user.removeToken(req.token).then(() => {
+  //   res.status(200).send();
+  // }, () => {
+  //   res.status(400).send();
+  // });
 });
 
 // POST /users
